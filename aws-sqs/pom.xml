@@ -27,6 +27,7 @@
     </properties>
 
     <dependencies>
+        <!--spring-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -37,6 +38,7 @@
             <artifactId>spring-jms</artifactId>
         </dependency>
 
+        <!--aws-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
@@ -49,9 +51,7 @@
             <version>${aws.sqs.lib}</version>
         </dependency>
 
-
-
-
+        <!--tests-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
