@@ -17,6 +17,8 @@ import javax.jms.Session;
 @Configuration
 @EnableJms
 public class SqsConfig {
+    public static final String SQS_NAME = "opendoors17-dev-test";
+
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(SQSConnectionFactory connectionFactory) {
         final String concurrency = "3-10";
