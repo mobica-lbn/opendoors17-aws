@@ -1,37 +1,35 @@
 package com.mobica.cloud.aws.db;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DynamoDbServiceTest {
 
     @Autowired
-    AmazonDynamoDB amazonDynamoDB;
-
-    @Autowired
-    DynamoDbService dynamoDbService;
-
+    private DynamoDbService dynamoDbService;
 
     @Test
-    public void addMessage() throws Exception {
-        String textMessage = "Hello message from Reyes";
-        dynamoDbService.saveMessage(textMessage);
-//        Message message = dynamoDbService.getMessage(textMessage);
-//        Assert.assertThat(textMessage, CoreMatchers.containsString(message.getMessage()));
-    }
+    public void testSaveMessage() {
+        //given
+        String message = "db_test_msg";
 
-    @Test
-    public void removeMessage() throws Exception {
-        String textMessage = "Hello message from Reyes";
-        dynamoDbService.removeMessage(textMessage);
-        Message message = dynamoDbService.getMessage(textMessage);
-        Assert.assertNull(message);
+        //when
+        dynamoDbService.saveMessage(message);
+
+        //then
+        Optional<Message> messageBy = dynamoDbService.getMessageBy(message);
+        assertEquals(message, messageBy.get().getMessage());
+
+        //after
+        dynamoDbService.removeMessageBy(message);
     }
 }

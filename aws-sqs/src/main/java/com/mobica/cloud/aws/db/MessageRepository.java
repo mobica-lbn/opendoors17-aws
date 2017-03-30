@@ -1,55 +1,51 @@
 package com.mobica.cloud.aws.db;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.ScanRequest;
-import com.amazonaws.services.dynamodbv2.model.ScanResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class MessageRepository {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageRepository.class);
 
-    @Autowired
-    DynamoDBMapper mapper;
+    private final DynamoDBMapper mapper;
 
-    @Autowired
-    AmazonDynamoDB amazonDynamoDB;
+    public MessageRepository(DynamoDBMapper mapper) {
+        this.mapper = mapper;
+    }
 
-    public void saveMessage(Message message){
+    public void saveMessage(Message message) {
         mapper.save(message);
-        viewAllMessages();
+
+        LOGGER.debug("Message saved: " + message);
     }
 
-    public void removeMessage(String message){
-        Message messageObj = getMessage(message);
-        if(messageObj != null) {
-            mapper.delete(messageObj);
-        }
+    public void removeMessage(String message) {
+        Optional<Message> readMessage = getMessage(message);
+        readMessage.ifPresent(msg -> {
+            mapper.delete(msg);
+            LOGGER.debug("Message deleted: " + msg);
+        });
     }
 
-    public Message getMessage(String message){
-        HashMap<String, AttributeValue> parameters = new HashMap<String, AttributeValue>();
-        parameters.put(":message", new AttributeValue().withS(message));
+    public Optional<Message> getMessage(String message) {
+        Map<String, AttributeValue> eav = new HashMap<>();
+        eav.put(":message", new AttributeValue().withS(message));
 
-        DynamoDBQueryExpression<Message> queryExpression = new DynamoDBQueryExpression<Message>()
-                .withKeyConditionExpression("message = :message")
-                .withExpressionAttributeValues(parameters);
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("message = :message")
+                .withExpressionAttributeValues(eav);
 
-        return mapper.query(Message.class, queryExpression).get(0);
+        List<Message> scanResult = mapper.scan(Message.class, scanExpression);
+        return scanResult.isEmpty() ? Optional.empty() : Optional.of(scanResult.get(0));
     }
 
-    public void viewAllMessages(){
-        ScanRequest scanRequest = new ScanRequest().withTableName("Messages");
-
-        ScanResult result = amazonDynamoDB.scan(scanRequest);
-        for (Map<String, AttributeValue> item : result.getItems()){
-            System.out.println(item);
-        }
-    }
 }
