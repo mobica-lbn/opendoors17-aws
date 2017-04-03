@@ -4,6 +4,7 @@ package com.mobica.cloud.aws.config;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
@@ -34,9 +35,9 @@ public class SqsConfig {
     }
 
     @Bean
-    public SQSConnectionFactory createSqsConnection(AWSCredentialsProvider awsCredentialsProvider) {
+    public SQSConnectionFactory createSqsConnection(AWSCredentialsProvider awsCredentialsProvider, Regions region) {
         return SQSConnectionFactory.builder()
-                .withRegion(Region.getRegion(AwsConfig.REGION))
+                .withRegion(Region.getRegion(region))
                 .withAWSCredentialsProvider(awsCredentialsProvider)
                 .build();
     }
