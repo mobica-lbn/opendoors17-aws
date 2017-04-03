@@ -38,8 +38,9 @@ public class AwsSqsApplicationTests {
     public void messageSentConsumedAndSaved() throws InterruptedException {
         //given
         Long id = -2L;
-        String message = "integration_message";
-        SqsMessage sqsMessage = new SqsMessage(id, message);
+        String title = "integration_title";
+        SqsMessage sqsMessage = new SqsMessage(id);
+        sqsMessage.setTitle(title);
         String sqsMessageJson = sqsMessageConverter.toJson(sqsMessage);
 
         //when
@@ -49,7 +50,7 @@ public class AwsSqsApplicationTests {
         Thread.sleep(5000);
         Optional<DbMessage> messageBy = dbService.getMessageBy(id);
         assertThat(sqsMessage.getId(), is(equalTo(messageBy.get().getId())));
-        assertThat(sqsMessage.getMessage(), is(equalTo(messageBy.get().getMessage())));
+        assertThat(sqsMessage.getTitle(), is(equalTo(messageBy.get().getTitle())));
 
         //after
         dbService.removeMessageBy(id);

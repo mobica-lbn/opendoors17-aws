@@ -36,8 +36,9 @@ public class SqsServiceTest {
         //given
         CountDownLatch latch = new CountDownLatch(1);
         Long id = -1L;
-        String message = "test_message";
-        SqsMessage sqsMessage = new SqsMessage(id, message);
+        String title = "test_title";
+        SqsMessage sqsMessage = new SqsMessage(id);
+        sqsMessage.setTitle(title);
         String sqsMessageJson = sqsMessageConverter.toJson(sqsMessage);
         StringBuilder received = new StringBuilder();
         doAnswer(invocationOnMock -> {
@@ -54,6 +55,6 @@ public class SqsServiceTest {
         latch.await(10, TimeUnit.SECONDS);
         SqsMessage sqsMessageReceived = sqsMessageConverter.fromJson(received.toString());
         assertEquals(id, sqsMessageReceived.getId());
-        assertEquals(message, sqsMessageReceived.getMessage());
+        assertEquals(title, sqsMessageReceived.getTitle());
     }
 }

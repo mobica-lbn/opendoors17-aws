@@ -8,7 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -21,15 +21,16 @@ public class DbServiceTest {
     public void testSaveMessage() {
         //given
         Long id = -1L;
-        String message = "test_message";
-        DbMessage dbMessage = new DbMessage(id, message);
+        String title = "test_title";
+        DbMessage dbMessage = new DbMessage(id);
+        dbMessage.setTitle(title);
 
         //when
         dbService.saveMessage(dbMessage);
 
         //then
         Optional<DbMessage> messageBy = dbService.getMessageBy(id);
-        assertEquals(message, messageBy.get().getMessage());
+        assertEquals(title, messageBy.get().getTitle());
         assertEquals(id, messageBy.get().getId());
 
         //after
