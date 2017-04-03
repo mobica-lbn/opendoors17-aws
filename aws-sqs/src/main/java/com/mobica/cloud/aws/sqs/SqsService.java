@@ -1,26 +1,27 @@
 package com.mobica.cloud.aws.sqs;
 
-import com.mobica.cloud.aws.db.DynamoDbService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.jms.annotation.JmsListener;
+import com.mobica.cloud.aws.db.DbMessage;
+import com.mobica.cloud.aws.db.DbService;
 import org.springframework.stereotype.Service;
-
-import static com.mobica.cloud.aws.config.SqsConfig.SQS_NAME;
 
 @Service
 public class SqsService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SqsService.class);
 
-    private final DynamoDbService dynamoDbService;
+    private final DbService dbService;
+    private final SqsMessageConverter sqsMessageConverter;
 
-    public SqsService(DynamoDbService dynamoDbService) {
-        this.dynamoDbService = dynamoDbService;
+    public SqsService(DbService dbService, SqsMessageConverter sqsMessageConverter) {
+        this.dbService = dbService;
+        this.sqsMessageConverter = sqsMessageConverter;
     }
 
-    @JmsListener(destination = SQS_NAME)
-    public void consumeMessage(String message) {
-        LOGGER.debug("Message received: " + message);
-        dynamoDbService.saveMessage(message);
+    public void processMessage(String sqsMessageJson) {
+        DbMessage dbMessage = convertFrom(sqsMessageJson);
+        dbService.saveMessage(dbMessage);
+    }
+
+    private DbMessage convertFrom(String sqsMessageJson) {
+        SqsMessage sqsMessage = sqsMessageConverter.fromJson(sqsMessageJson);
+        return new DbMessage(sqsMessage.getId(), sqsMessage.getMessage());
     }
 }

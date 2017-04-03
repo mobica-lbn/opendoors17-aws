@@ -1,11 +1,13 @@
 package com.mobica.cloud.aws;
 
-import com.mobica.cloud.aws.config.SqsConfig;
-import com.mobica.cloud.aws.db.DynamoDbService;
-import com.mobica.cloud.aws.db.Message;
+import com.mobica.cloud.aws.db.DbMessage;
+import com.mobica.cloud.aws.db.DbService;
+import com.mobica.cloud.aws.sqs.SqsMessage;
+import com.mobica.cloud.aws.sqs.SqsMessageConverter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,23 +26,32 @@ public class AwsSqsApplicationTests {
     private JmsTemplate jmsTemplate;
 
     @Autowired
-    private DynamoDbService dynamoDbService;
+    private DbService dbService;
+
+    @Autowired
+    private SqsMessageConverter sqsMessageConverter;
+
+    @Value(value = "${aws.sqs.name}")
+    private String sqsName;
 
     @Test
     public void messageSentConsumedAndSaved() throws InterruptedException {
-
         //given
+        Long id = -2L;
         String message = "integration_message";
+        SqsMessage sqsMessage = new SqsMessage(id, message);
+        String sqsMessageJson = sqsMessageConverter.toJson(sqsMessage);
 
         //when
-        jmsTemplate.convertAndSend(SqsConfig.SQS_NAME, message);
+        jmsTemplate.convertAndSend(sqsName, sqsMessageJson);
 
         //then
-        dynamoDbService.wait(10000);
-        Optional<Message> messageBy = dynamoDbService.getMessageBy(message);
-        assertThat(message, is(equalTo(messageBy.get())));
+        Thread.sleep(5000);
+        Optional<DbMessage> messageBy = dbService.getMessageBy(id);
+        assertThat(sqsMessage.getId(), is(equalTo(messageBy.get().getId())));
+        assertThat(sqsMessage.getMessage(), is(equalTo(messageBy.get().getMessage())));
 
         //after
-        dynamoDbService.removeMessageBy(message);
+        dbService.removeMessageBy(id);
     }
 }

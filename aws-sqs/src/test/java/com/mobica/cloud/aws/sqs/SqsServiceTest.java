@@ -1,11 +1,10 @@
 package com.mobica.cloud.aws.sqs;
 
 
-import com.mobica.cloud.aws.config.SqsConfig;
-import com.mobica.cloud.aws.db.DynamoDbService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jms.core.JmsTemplate;
@@ -21,29 +20,40 @@ import static org.mockito.Mockito.doAnswer;
 @SpringBootTest
 public class SqsServiceTest {
     @MockBean
-    private DynamoDbService dynamoDbService;
+    private SqsService sqsService;
 
     @Autowired
     private JmsTemplate jmsTemplate;
+
+    @Autowired
+    private SqsMessageConverter sqsMessageConverter;
+
+    @Value(value = "${aws.sqs.name}")
+    private String sqsName;
 
     @Test
     public void testMessageReceived() throws InterruptedException {
         //given
         CountDownLatch latch = new CountDownLatch(1);
+        Long id = -1L;
         String message = "test_message";
+        SqsMessage sqsMessage = new SqsMessage(id, message);
+        String sqsMessageJson = sqsMessageConverter.toJson(sqsMessage);
         StringBuilder received = new StringBuilder();
         doAnswer(invocationOnMock -> {
             received.setLength(0);
             received.append(String.class.cast(invocationOnMock.getArguments()[0]));
             latch.countDown();
             return null;
-        }).when(dynamoDbService).saveMessage(message);
+        }).when(sqsService).processMessage(sqsMessageJson);
 
         //when
-        jmsTemplate.convertAndSend(SqsConfig.SQS_NAME, message);
+        jmsTemplate.convertAndSend(sqsName, sqsMessageJson);
 
         //then
         latch.await(10, TimeUnit.SECONDS);
-        assertEquals(message, received.toString());
+        SqsMessage sqsMessageReceived = sqsMessageConverter.fromJson(received.toString());
+        assertEquals(id, sqsMessageReceived.getId());
+        assertEquals(message, sqsMessageReceived.getMessage());
     }
 }

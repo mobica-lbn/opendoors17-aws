@@ -12,24 +12,27 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class DynamoDbServiceTest {
+public class DbServiceTest {
 
     @Autowired
-    private DynamoDbService dynamoDbService;
+    private DbService dbService;
 
     @Test
     public void testSaveMessage() {
         //given
-        String message = "db_test_msg";
+        Long id = -1L;
+        String message = "test_message";
+        DbMessage dbMessage = new DbMessage(id, message);
 
         //when
-        dynamoDbService.saveMessage(message);
+        dbService.saveMessage(dbMessage);
 
         //then
-        Optional<Message> messageBy = dynamoDbService.getMessageBy(message);
+        Optional<DbMessage> messageBy = dbService.getMessageBy(id);
         assertEquals(message, messageBy.get().getMessage());
+        assertEquals(id, messageBy.get().getId());
 
         //after
-        dynamoDbService.removeMessageBy(message);
+        dbService.removeMessageBy(id);
     }
 }
