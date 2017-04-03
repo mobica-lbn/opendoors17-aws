@@ -3,7 +3,6 @@ package com.mobica.cloud.aws.dynamo.web;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,6 @@ import com.mobica.cloud.aws.dynamo.service.DynamoDBService;
 public class MainController {
 
   @Autowired
-  // @Qualifier("remote")
   private DynamoDBService service;
 
   @RequestMapping(value = "/id/{id}", produces = "application/json")

@@ -12,7 +12,7 @@ import com.mobica.cloud.aws.dynamo.service.DynamoDBService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class DynamoDbApplicationTests {
+public class DynamoDBApplicationTests {
 
   @Autowired
   private DynamoDBService service;
@@ -29,7 +29,7 @@ public class DynamoDbApplicationTests {
 
   @Test
   public void getAttribute() {
-    assertTrue(service.findById(-1).hasAttribute("message"));
+    assertTrue(service.findById(-1).hasAttribute("title"));
   }
 
   @Test
