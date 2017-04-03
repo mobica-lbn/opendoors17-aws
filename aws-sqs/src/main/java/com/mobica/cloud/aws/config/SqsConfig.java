@@ -2,9 +2,8 @@ package com.mobica.cloud.aws.config;
 
 
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
@@ -17,8 +16,6 @@ import javax.jms.Session;
 @Configuration
 @EnableJms
 public class SqsConfig {
-    public static final String SQS_NAME = "opendoors17-dev-test";
-
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(SQSConnectionFactory connectionFactory) {
         final String concurrency = "3-10";
@@ -37,10 +34,10 @@ public class SqsConfig {
     }
 
     @Bean
-    public SQSConnectionFactory createSqsConnection() {
+    public SQSConnectionFactory createSqsConnection(AWSCredentialsProvider awsCredentialsProvider) {
         return SQSConnectionFactory.builder()
-                .withRegion(Region.getRegion(Regions.US_EAST_1))
-                .withAWSCredentialsProvider(new EnvironmentVariableCredentialsProvider())
+                .withRegion(Region.getRegion(AwsConfig.REGION))
+                .withAWSCredentialsProvider(awsCredentialsProvider)
                 .build();
     }
 }
