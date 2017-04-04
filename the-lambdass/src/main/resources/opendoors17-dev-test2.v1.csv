@@ -1,0 +1,5 @@
+ID,Title,Author,ISBN,Kind1,Kind2,Kind3,Keyword1,Keyword2
+1,"W pustyni i w Puszczy", "Henryk Sienkieiwcz", "przygoda","powieść",true,"sienkiewicz","lektura"
+2,"Janko muzykant", "Henryk Sienkieiwcz", "przygoa","nowela",false,"sienkiewicz","lektura"
+3,"Pan Tadeusz", "Adam Mickiewicz", "przygoda","powieść",true,"mickiewicz","lektura"
+4,"Juliusz Słowaki", "Dziady", "przygoda","powieść",true,"słowacki","lektura"

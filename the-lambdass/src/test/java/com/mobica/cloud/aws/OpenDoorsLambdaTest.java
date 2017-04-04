@@ -7,14 +7,13 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple App.
  */
-public class AppTest
-        extends TestCase {
+public class OpenDoorsLambdaTest extends TestCase {
     /**
      * Create the test case
      *
      * @param testName name of the test case
      */
-    public AppTest(String testName) {
+    public OpenDoorsLambdaTest(String testName) {
         super(testName);
     }
 
@@ -22,7 +21,7 @@ public class AppTest
      * @return the suite of tests being tested
      */
     public static Test suite() {
-        return new TestSuite(AppTest.class);
+        return new TestSuite(OpenDoorsLambdaTest.class);
     }
 
     /**
