@@ -31,6 +31,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.splitByWholeSeparatorPreserveAllTokens;
@@ -44,6 +45,7 @@ public class OpenDoorsLambda implements RequestHandler<S3Event, Object> {
     private static final String DEFAULT_REGION = "us-east-1";
     private static final String DEFAULT_SQS_TOPIC_NAME = "opendoors17-dev-test";
 
+    private AWSCredentialsProvider credentialsProvider;
     private AmazonSQS sqs;
     private AmazonS3 s3;
 
@@ -100,23 +102,25 @@ public class OpenDoorsLambda implements RequestHandler<S3Event, Object> {
      * @param context
      */
     private void initConnections(Context context)  {
-        final String accessKey = getenv("LAMBDA_AWS_ACCESS_KEY");
-        final String secretKey = getenv("LAMBDA_AWS_SECRET_KEY");
-        final String region = defaultIfBlank(getenv("LAMBDA_AWS_REGION"), DEFAULT_REGION);
+        if(credentialsProvider == null){
+            final String accessKey = getenv("LAMBDA_AWS_ACCESS_KEY");
+            final String secretKey = getenv("LAMBDA_AWS_SECRET_KEY");
+            final String region = defaultIfBlank(getenv("LAMBDA_AWS_REGION"), DEFAULT_REGION);
 
-        final AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
+            credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
 
-        s3 = AmazonS3ClientBuilder.standard()
-                .withCredentials(credentialsProvider)
-                .withRegion(region)
-                .build();
+            s3 = AmazonS3ClientBuilder.standard()
+                    .withCredentials(credentialsProvider)
+                    .withRegion(region)
+                    .build();
 
-        sqs = AmazonSQSClientBuilder.standard()
-                .withCredentials(credentialsProvider)
-                .withRegion(region)
-                .build();
+            sqs = AmazonSQSClientBuilder.standard()
+                    .withCredentials(credentialsProvider)
+                    .withRegion(region)
+                    .build();
 
-        context.getLogger().log("Initialize s3 and sqs");
+            context.getLogger().log("Initialize s3 and sqs");
+        }
     }
 
 	/**
@@ -154,12 +158,12 @@ public class OpenDoorsLambda implements RequestHandler<S3Event, Object> {
     private static String prepareJson(String line, List<String> header) {
         final StringBuilder str = new StringBuilder("{");
         final List<String> list = asList(splitByWholeSeparatorPreserveAllTokens(line, ",")).stream()
-                .map(e -> e.trim().startsWith("\"") && e.trim().endsWith("\"") ? e.trim() : e)
+                .map(e -> isNotBlank(e) ? e.trim() : e)
                 .map(e -> inQuotes(e) ? join("\"", e, "\"") : e)
                 .collect(toList());
         range(0, header.size()).forEach(i -> str.append("\"")
                 .append(header.get(i)).append("\": ")
-				.append(i < list.size() - 1 ? list.get(i) : "\"\"").append(i < header.size() - 1 ? ", " : EMPTY));
+				.append(i < list.size() ? list.get(i) : "\"\"").append(i < header.size() - 1 ? ", " : EMPTY));
         return str.append("}").toString();
     }
 
