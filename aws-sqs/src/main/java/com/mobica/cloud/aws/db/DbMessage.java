@@ -98,4 +98,19 @@ public class DbMessage {
     public void setKeyword2(String keyword2) {
         this.keyword2 = keyword2;
     }
+
+    @Override
+    public String toString() {
+        return "DbMessage{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", isbn='" + isbn + '\'' +
+                ", kind1='" + kind1 + '\'' +
+                ", kind2='" + kind2 + '\'' +
+                ", kind3='" + kind3 + '\'' +
+                ", keyword1='" + keyword1 + '\'' +
+                ", keyword2='" + keyword2 + '\'' +
+                '}';
+    }
 }
