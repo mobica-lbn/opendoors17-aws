@@ -1,4 +1,4 @@
-##AWS-SQS
+## AWS-SQS
 
 The main purpose of this exercise is to make application responsible for receiving sqs messages and putting them into dynamodb. To achieve it follow with steps below:
 
